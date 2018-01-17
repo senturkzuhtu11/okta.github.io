@@ -26,6 +26,7 @@ Creates a new user in your Okta organization with or without credentials
 - [Create User without Credentials](#create-user-without-credentials)
 - [Create User with Recovery Question](#create-user-with-recovery-question)
 - [Create User with Password](#create-user-with-password)
+- [Create User with Imported Hashed Password](#create-user-with-imported-hashed-password)
 - [Create User with Password & Recovery Question](#create-user-with-password--recovery-question)
 - [Create User with Authentication Provider](#create-user-with-authentication-provider)
 - [Create User in Group](#create-user-in-group)
@@ -255,6 +256,82 @@ curl -v -X POST \
     "provider": {
       "type": "OKTA",
       "name": "OKTA"
+    }
+  },
+  "_links": {
+    "activate": {
+      "href": "https://{yourOktaDomain}.com/api/v1/users/00ub0oNGTSWTBKOLGLNR/lifecycle/activate"
+    }
+  }
+}
+~~~
+
+#### Create User with Imported Hashed Password
+{:.api .api-operation}
+
+> Creating or updating users with an imported hashed password is an {% api_lifecycle ea %} feature.
+
+Creates a user with a specified [hashed password](#hashed-password-object)
+
+The new user is able to login immediately after activation with the specified password.
+This flow is common when migrating users from another data store in cases where we wish to allow the users to retain their current passwords.
+
+> Important: Do not generate or send a one-time activation token when activating users with an imported password.  Users should login with their imported password.
+
+##### Request Example
+{:.api .api-request .api-request-example}
+
+~~~sh
+curl -v -X POST \
+-H "Accept: application/json" \
+-H "Content-Type: application/json" \
+-H "Authorization: SSWS ${api_token}" \
+-d '{
+  "profile": {
+    "firstName": "Isaac",
+    "lastName": "Brock",
+    "email": "isaac.brock@example.com",
+    "login": "isaac.brock@example.com",
+    "mobilePhone": "555-415-1337"
+  },
+  "credentials": {
+    "password" : {
+      "hash": {
+        "algorithm": "BCRYPT",
+        "workFactor": 10,
+        "salt": "rwh3vH166HCH/NT9XV5FYu",
+        "value": "qaMqvAPULkbiQzkTCWo5XDcvzpk8Tna"
+      }
+    }
+  }
+}' "https://{yourOktaDomain}.com/api/v1/users?activate=false"
+~~~
+
+##### Response Example
+{:.api .api-response .api-response-example}
+
+~~~json
+{
+  "id": "00ub0oNGTSWTBKOLGLNR",
+  "status": "ACTIVE",
+  "created": "2013-07-02T21:36:25.344Z",
+  "activated": null,
+  "statusChanged": null,
+  "lastLogin": null,
+  "lastUpdated": "2013-07-02T21:36:25.344Z",
+  "passwordChanged": "2013-07-02T21:36:25.344Z",
+  "profile": {
+    "firstName": "Isaac",
+    "lastName": "Brock",
+    "email": "isaac.brock@example.com",
+    "login": "isaac.brock@example.com",
+    "mobilePhone": "555-415-1337"
+  },
+  "credentials": {
+    "password": {},
+    "provider": {
+      "type": "IMPORT",
+      "name": "IMPORT"
     }
   },
   "_links": {
@@ -840,8 +917,8 @@ The first three parameters correspond to different types of lists:
 | Parameter | Description                                                                                                                                  | Param Type | DataType | Required |
 |:----------|:---------------------------------------------------------------------------------------------------------------------------------------------|:-----------|:---------|:---------|
 | q         | Finds a user that matches `firstName`, `lastName`, and `email` properties                                                                    | Query      | String   | FALSE    |
-| filter    |   [Filters](/docs/api/getting_started/design_principles.html#filtering) users with a supported expression for a subset of properties           | Query      | String   | FALSE    |
-| search    | Searches for users with a supported   [filtering](/docs/api/getting_started/design_principles.html#filtering)  expression for most properties  | Query      | String   | FALSE    |
+| filter    |   [Filters](/docs/api/getting_started/design_principles#filtering) users with a supported expression for a subset of properties           | Query      | String   | FALSE    |
+| search    | Searches for users with a supported   [filtering](/docs/api/getting_started/design_principles#filtering)  expression for most properties  | Query      | String   | FALSE    |
 | limit     | Specifies the number of results returned                                                                                                     | Query      | Number   | FALSE    |
 | after     | Specifies the pagination cursor for the next page of users (default is 200)                                                                  | Query      | String   | FALSE    |
 
@@ -849,9 +926,9 @@ The first three parameters correspond to different types of lists:
   * If you don&#8217;t specify any value for `limit` and do specify a query, a maximum of 10 results are returned.
   * The maximum value for `limit` is 200 for most orgs.
   *  Don&#8217;t write code that depends on the default or maximum value, as it may change.
-  * An HTTP 500 status code usually indicates that you have exceeded the request timeout.  Retry your request with a smaller limit and paginate the results. For more information, see [Pagination](/docs/api/getting_started/design_principles.html#pagination).
+  * An HTTP 500 status code usually indicates that you have exceeded the request timeout.  Retry your request with a smaller limit and paginate the results. For more information, see [Pagination](/docs/api/getting_started/design_principles#pagination).
   * Use `limit` and `after` with all four query types.
-  * Treat the `after` cursor as an opaque value and obtain it through the next link relation. See [Pagination](/docs/api/getting_started/design_principles.html#pagination).
+  * Treat the `after` cursor as an opaque value and obtain it through the next link relation. See [Pagination](/docs/api/getting_started/design_principles#pagination).
 
 ##### Response Parameters
 {:.api .api-response .api-response-params}
@@ -1053,7 +1130,7 @@ Examples use cURL-style escaping instead of URL encoding to make them easier to 
 
 > Hint: If filtering by `email`, `lastName`, or `firstName`, it may be easier to use `q` instead of `filter`.
 
-See [Filtering](/docs/api/getting_started/design_principles.html#filtering) for more information about the expressions used in filtering.
+See [Filtering](/docs/api/getting_started/design_principles#filtering) for more information about the expressions used in filtering.
 
 ##### Filter Examples
 
@@ -1186,7 +1263,7 @@ curl -v -X GET \
 #### List Users with Search
 {:.api .api-operation}
 
-> Listing users with search is an {% api_lifecycle ea %} feature.
+> Listing users with search is an {% api_lifecycle ea %} feature and should not be used as a part of any critical flows, like authentication.
 
 Searches for user by the properties specified in the search parameter (case insensitive)
 
@@ -1368,11 +1445,12 @@ in the request is deleted.
 ##### Request Parameters
 {:.api .api-request .api-request-params}
 
-| Parameter   | Description                 | Param Type | DataType                                  | Required |
-|:------------|:----------------------------|:-----------|:------------------------------------------|:---------|
-| userId      | ID of user to update        | URL        | String                                    | TRUE     |
-| profile     | Updated profile for user    | Body       |   [Profile Object](#profile-object)         | FALSE    |
-| credentials | Update credentials for user | Body       |   [Credentials Object](#credentials-object) | FALSE    |
+| Parameter   | Description                                                        | Param Type | DataType                                  | Required |
+|:------------|:-------------------------------------------------------------------|:-----------|:------------------------------------------|:---------|
+| userId      | ID of user to update                                               | URL        | String                                    | TRUE     |
+| strict      | If true, validates against minimum age and history password policy | Query      | String                                    | FALSE    |
+| profile     | Updated profile for user                                           | Body       |   [Profile Object](#profile-object)         | FALSE    |
+| credentials | Update credentials for user                                        | Body       |   [Credentials Object](#credentials-object) | FALSE    |
 
 `profile` and `credentials` can be updated independently or together with a single request.
 
@@ -1393,11 +1471,12 @@ Updates a user&#8217;s profile or credentials with partial update semantics
 ##### Request Parameters
 {:.api .api-request .api-request-params}
 
-| Parameter   | Description                 | Param Type | DataType                                  | Required |
-|:------------|:----------------------------|:-----------|:------------------------------------------|:---------|
-| userId      | ID of user to update        | URL        | String                                    | TRUE     |
-| profile     | Updated profile for user    | Body       |   [Profile Object](#profile-object)         | FALSE    |
-| credentials | Update credentials for user | Body       |   [Credentials Object](#credentials-object) | FALSE    |
+| Parameter   | Description                                                        | Param Type | DataType                                  | Required |
+|:------------|:-------------------------------------------------------------------|:-----------|:------------------------------------------|:---------|
+| userId      | ID of user to update                                               | URL        | String                                    | TRUE     |
+| strict      | If true, validates against minimum age and history password policy | Query      | String                                    | FALSE    |
+| profile     | Updated profile for user                                           | Body       |   [Profile Object](#profile-object)         | FALSE    |
+| credentials | Update credentials for user                                        | Body       |   [Credentials Object](#credentials-object) | FALSE    |
 
 `profile` and `credentials` can be updated independently or with a single request.
 
@@ -1745,7 +1824,7 @@ id        | `id` of user | URL        | String   | TRUE     |
 ##### Response Parameters
 {:.api .api-response .api-response-params}
 
-Array of [Groups](groups.html)
+Array of [Groups](groups)
 
 ##### Request Example
 {:.api .api-request .api-request-example}
@@ -2519,11 +2598,12 @@ This operation can only be performed on users in `STAGED`, `ACTIVE`, `PASSWORD_E
 ##### Request Parameters
 {:.api .api-request .api-request-params}
 
-Parameter   | Description               | Param Type | DataType                            | Required |
-------------| --------------------------| ---------- | ------------------------------------| -------- |
-id          | `id` of user              | URL        | String                              | TRUE     |
-oldPassword | Current password for user | Body       | [Password Object](#password-object) | TRUE     |
-newPassword | New password for user     | Body       | [Password Object](#password-object) | TRUE     |
+Parameter   | Description                                            | Param Type | DataType                            | Required |
+------------| -------------------------------------------------------| ---------- | ------------------------------------| -------- |
+id          | `id` of user                                           | URL        | String                              | TRUE     |
+strict      | If true, validates against password minimum age policy | Query      | String                              | FALSE    |
+oldPassword | Current password for user                              | Body       | [Password Object](#password-object) | TRUE     |
+newPassword | New password for user                                  | Body       | [Password Object](#password-object) | TRUE     |
 
 ##### Response Parameters
 {:.api .api-response .api-response-params}
@@ -2653,7 +2733,7 @@ Lists all grants for the specified user
 | limit     | The maximum number of grants to return                                                       | Query      | Number   | FALSE    | 20      |
 | after     | Specifies the pagination cursor for the next page of grants                                  | Query      | String   | FALSE    |         |
 
-> Note: The after cursor should treated as an opaque value and obtained through [the next link relation](/docs/api/getting_started/design_principles.html#pagination).
+> Note: The after cursor should treated as an opaque value and obtained through [the next link relation](/docs/api/getting_started/design_principles#pagination).
 
 #### Request Example
 {:.api .api-request .api-request-example}
@@ -3031,6 +3111,405 @@ curl -v -X GET \
 ]
 ~~~
 
+## User Email Operations
+
+{% api_lifecycle beta %}
+
+Manage a user's email with the following operations.
+
+### User Email Object
+
+| Property    | Description                                 | Datatype                                                        | Unique |
+|:------------|:--------------------------------------------|:----------------------------------------------------------------|:-------|
+| id          | The ID of the email object                  | String                                                          | TRUE   |
+| status      | Whether the email is verified or not         | String                                                          | FALSE  |
+| value       | The value of the email address              | String                                                          | FALSE  |
+| _links      | Discoverable resources related to the email | [JSON HAL](http://tools.ietf.org/html/draft-kelly-json-hal-06)  | FALSE  |
+
+Example 
+
+~~~json
+{
+  "id": "00T196qTp3LIMZQ0L0g3",
+  "status": "UNVERIFIED | VERIFIED",
+  "value": "saml.jackson@example.com",
+  "_links": {
+    "self": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3",
+      "hints": {
+        "allow": [
+          "GET"
+        ]
+      }
+    },
+    "verify": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/verify",
+      "hints": {
+        "allow": [
+          "POST"
+        ]
+      }
+    },
+    "change": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/change",
+      "hints": {
+        "allow": [
+          "POST"
+        ]
+      }
+    },
+    "user": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3",
+      "hints": {
+        "allow": [
+          "GET"
+        ]
+      }
+    }
+  }
+}
+~~~
+
+### List Emails
+{:.api .api-operation}
+
+{% api_lifecycle beta %}
+
+{% api_operation get /api/v1/users/*:uid*/emails %}
+
+Lists a user's email
+
+#### Request
+{:.api .api-request .api-request-example}
+
+~~~sh
+GET /api/v1/users/00uzjoiIBruZE06jj0g3/emails HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+~~~
+
+#### Response (Verified Email)
+{:.api .api-response .api-response-example}
+
+> Note: Although the email is in `VERIFIED` status, the `verify` operation is still published for completeness.
+
+~~~json
+[
+  {
+    "id": "00T196qTp3LIMZQ0L0g3",
+    "status": "VERIFIED",
+    "value": "saml.jackson@example.com",
+    "_links": {
+      "self": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3",
+        "hints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      },
+      "verify": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/verify",
+        "hints": {
+          "allow": [
+            "POST"
+          ]
+        }
+      },
+      "change": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/change",
+        "hints": {
+          "allow": [
+            "POST"
+          ]
+        }
+      },
+      "user": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3",
+        "hints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      }
+    }
+  }
+]
+~~~
+
+#### Response (Unverified Email)
+{:.api .api-response .api-response-example}
+
+~~~json
+[
+  {
+    "id": "00T196qTp3LIMZQ0L0g3",
+    "status": "UNVERIFIED",
+    "value": "saml.jackson@example.com",
+    "_links": {
+      "self": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3",
+        "hints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      },
+      "verify": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/verify",
+        "hints": {
+          "allow": [
+            "POST"
+          ]
+        }
+      },
+      "user": {
+        "href": "/api/v1/users/00uzjoiIBruZE06jj0g3",
+        "hints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      }
+    }
+  }
+]
+~~~
+
+### Get Email
+{:.api .api-operation}
+
+{% api_lifecycle beta %}
+
+{% api_operation get /api/v1/users/*:uid*/emails/*:eid* %}
+
+Gets a particular email for a user
+
+#### Request
+{:.api .api-request .api-request-example}
+
+~~~sh
+GET /api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3 HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+~~~
+
+#### Response
+{:.api .api-response .api-response-example}
+
+~~~json
+{
+  "id": "00T196qTp3LIMZQ0L0g3",
+  "status": "UNVERIFIED",
+  "value": "saml.jackson@example.com",
+  "_links": {
+    "self": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3",
+      "hints": {
+        "allow": [
+          "GET"
+        ]
+      }
+    },
+    "verify": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/verify",
+      "hints": {
+        "allow": [
+          "POST"
+        ]
+      }
+    },
+    "user": {
+      "href": "/api/v1/users/00uzjoiIBruZE06jj0g3",
+      "hints": {
+        "allow": [
+          "GET"
+        ]
+      }
+    }
+  }
+}
+~~~
+
+### Verify Email
+{:.api .api-operation}
+
+{% api_lifecycle beta %}
+
+{% api_operation post /api/v1/users/*:uid*/emails/*:eid*/verify %}
+
+Triggers email verification flow for an unverified email
+
+> Verification is idempotent and can be retried at any time.  Issuing a new verification invalidates any previously issued verification tokens.
+
+#### Request Parameters
+{:.api .api-request .api-request-params}
+
+| Parameter   | Description                                                               | Param Type | DataType           | Required | Default                     |
+|:----------- | ------------------------------------------------------------------------- | ---------- | ------------------ | -------- | --------------------------- |
+| uid         | `id` of user                                                              | URL        | String             | TRUE     |                             |
+| eid         | `id` of email                                                             | URL        | String             | TRUE     |                             |
+| sendEmail   | Sends a verification email to the user if `true`                          | Query      | Boolean            | FALSE    | TRUE                        |
+| redirectUri | Specifies where the end user is redirected after verification             | Body       | String             | FALSE    | `/app/UserHome`             |
+| expiresAt   | Timestamp when the verification token expires                             | Body       | Date               | FALSE    | 5 days |
+| actions     | Extensible actions performed when verification token is validated          | Body       | Actions Object     | FALSE    |                             |
+
+##### Actions Object
+
+| Property      | DataType                         | Nullable | Unique | Readonly | Default          |
+|:--------------|:---------------------------------|:---------|:-------|:---------|:-----------------|
+| signOn        | `NOT_REQUIRED` or `REQUIRED`     | TRUE     | FALSE  | FALSE    | `REQUIRED`       |
+
+The `signOn` property determines whether a user has to sign in after clicking on an email verification link to complete the verification process. Thus, if `signOn` is set to `REQUIRED`, an Okta session is granted after the user has signed in.
+
+#### Request
+{:.api .api-request .api-request-example}
+
+~~~sh
+POST /api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/verify HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "redirectUri": "https://example.com/some/page?state=blah&custom=true",
+  "expiresAt": "2017-06-14T00:17:57.000Z",
+  "actions": {
+    "signOn": "REQUIRED"
+  }
+}
+~~~
+
+#### Response
+{:.api .api-response .api-response-example}
+
+~~~sh
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+
+{
+  "verificationToken": "HcjJ03HcEEFEydBk5N8k"
+}
+~~~
+
+##### Errors
+
+~~~sh
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "errorCode": "E0000001",
+  "errorSummary": "Api validation failed: expiresAt",
+  "errorLink": "E0000001",
+  "errorId": "oaeWGQKoQHeQmy0u8w8bPwi_Q",
+  "errorCauses": [
+    {
+      "errorSummary": "The verification token must not expire in the past"
+    }
+  ]
+}
+~~~
+
+### Change Email Credential
+{:.api .api-operation}
+
+{% api_lifecycle beta %}
+
+{% api_operation post /api/v1/users/*:id*/emails/*:eid*/change %}
+
+Changes a verified email
+
+This operation delays a profile update or profile push until the user has verified their email address.
+
+> Email changes are idempotent.  Issuing a new change verification replaces any previously issued change verification tokens.
+
+#### Request Parameters
+{:.api .api-request .api-request-params}
+
+| Parameter   | Description                                                                | Param Type | DataType           | Required | Default                     |
+|:----------- | -------------------------------------------------------------------------- | ---------- | ------------------ | -------- | --------------------------- |
+| uid         | `id` of user                                                               | URL        | String             | TRUE     |                             |
+| eid         | `id` of email                                                              | URL        | String             | TRUE     |                             |
+| sendEmail   | Sends a verification email to the user if `true`                           | Query      | Boolean            | FALSE    | TRUE                        |
+| value       | Target email address that will replace current email address when verified | Body       | String (RFC Email) | TRUE     |                             |
+| redirectUri | Specifies where the end user is redirected after verification              | Body       | String             | FALSE    | `/app/UserHome`             |
+| expiresAt   | Timestamp when the verification token expires                              | Body       | Date               | FALSE    | 5 days |
+| actions     | Extensible actions peformed when verification token is validated           | Body       | Actions Object     | FALSE    |                             |
+
+##### Actions Object
+
+| Property      | DataType                         | Nullable | Unique | Readonly | Default          |
+|:--------------|:---------------------------------|:---------|:-------|:---------|:-----------------|
+| signOn        | `NOT_REQUIRED` or `REQUIRED`     | TRUE     | FALSE  | FALSE    | `REQUIRED`       |
+
+The `signOn` property determines whether a user has to sign in after clicking on an email verification link to complete the verification process. Thus, if `signOn` is set to `REQUIRED`, an Okta session is granted after the user has signed in.
+
+#### Request
+{:.api .api-request .api-request-example}
+
+~~~sh
+POST /api/v1/users/00uzjoiIBruZE06jj0g3/emails/00T196qTp3LIMZQ0L0g3/change HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "redirectUri": "https://example.com/some/page?state=blah&custom=true",
+  "expiresAt": "2017-06-14T00:17:57.000Z",
+  "value": "update@example.com",
+  "actions": {
+    "signOn": "REQUIRED"
+  }
+}
+~~~
+
+#### Response
+{:.api .api-response .api-response-example}
+
+~~~sh
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+
+{
+  "verificationToken": "HcjJ03HcEEFEydBk5N8k"
+}
+~~~
+
+##### Errors
+
+~~~sh
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "errorCode": "E0000001",
+  "errorSummary": "Api validation failed: expiresAt",
+  "errorLink": "E0000001",
+  "errorId": "oaeWGQKoQHeQmy0u8w8bPwi_Q",
+  "errorCauses": [
+    {
+      "errorSummary": "The verification token must not expire in the past"
+    }
+  ]
+}
+~~~
+
+~~~sh
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "errorCode": "E0000001",
+  "errorSummary": "Api validation failed: value",
+  "errorLink": "E0000001",
+  "errorId": "oaeWGQKoQHeQmy0u8w8bPwi_Q",
+  "errorCauses": [
+    {
+      "errorSummary": "The verification token must not expire in the past"
+    }
+  ]
+}
+~~~
+
 ## User Model
 
 ### Example
@@ -3250,7 +3729,7 @@ For more information about `login`, see [Get User by ID](#get-user-with-id).
 
 #### Custom Profile Properties
 
-User profiles may be extended with custom properties but the property must first be added to the user profile schema before it can be referenced.  You can use the Profile Editor in the Admin UI or the [Schemas API](./schemas.html) to manage schema extensions.
+User profiles may be extended with custom properties but the property must first be added to the user profile schema before it can be referenced.  You can use the Profile Editor in the Admin UI or the [Schemas API](schemas) to manage schema extensions.
 
 Custom attributes may contain HTML tags. It is the client&#8217;s responsibility to escape or encode this data before displaying it. Use [best-practices](https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet) to prevent cross-site scripting.
 
@@ -3286,13 +3765,20 @@ Specifies primary authentication and recovery credentials for a user.  Credentia
 
 Specifies a password for a user
 
-A password value is a **write-only** property.  When a user has a valid password and a response object contains a password credential, then the Password Object is a bare object without the `value` property defined (e.g. `password: {}`) to indicate that a password value exists.
-
 | Property | DataType | Nullable | Unique | Readonly | MinLength       | MaxLength | Validation      |
 |:---------|:---------|:---------|:-------|:---------|:----------------|:----------|:----------------|
-| value    | String   | TRUE     | FALSE  | FALSE    | Password Policy | 40        | Password Policy |
+| value    | String   | TRUE     | FALSE  | FALSE    | Password Policy | 72        | Password Policy |
+| hash     | [Hashed Password Object](#hashed-password-object)     | TRUE     | FALSE  | FALSE    | N/A | N/A |  |
+
+A password value is a **write-only** property. 
+A password hash is a **write-only** property. 
+
+When a user has a valid password or imported hashed password, and a response object contains a password credential, then the Password Object is a bare object without the `value` property defined (e.g. `password: {}`) to indicate that a password value exists.
+
 
 ##### Default Password Policy
+
+The password specified in the value property must meet the default password policy requirements:
 
 - Must be a minimum of 8 characters
 - Must have a character from the following groups:
@@ -3303,6 +3789,40 @@ A password value is a **write-only** property.  When a user has a valid password
   - *For example, a user with login isaac.brock@example.com will not be able set password brockR0cks! as the password contains the login part brock*
 
 > Password policy requirements can be modified in the Okta Admin UI *(Security -> Policies)*
+
+##### Hashed Password Object
+
+{% api_lifecycle ea %}
+
+Specifies a hashed password that can be imported into Okta.  This allows an existing password to be imported into Okta directly from some other store.
+A hashed password may be specified in a Password Object when creating or updating a user, but not for other operations.  When updating a user with a hashed password the user must have the `STAGED` status.
+
+| Property | DataType | Description | Nullable | Min Value | Max Value |
+|:---------|:---------|:---------|:-------|:---------|:----------------|
+| algorithm    | String   | The algorithm used to hash the password.  Must be set to "BCRYPT" | FALSE     | N/A  | N/A  | 
+| workFactor    | Integer   | Governs the strength of the hash, and the time required to compute it | FALSE     | 1  | 20  |  
+| salt    | String   | Specifies the password salt used to generate the hash | FALSE     | 22  | 22  |  
+| value | String | The actual hashed password| FALSE | N/A | N/A | 
+
+
+~~~sh
+"password" : {
+  "hash": {
+    "algorithm": "BCRYPT",
+    "workFactor": 10,
+    "salt": "rwh3vH166HCH/NT9XV5FYu",
+    "value": "qaMqvAPULkbiQzkTCWo5XDcvzpk8Tna"
+  }
+}
+~~~
+
+
+##### Hashing Algorithm
+Currently the only supported hashing algorithim is the bcrypt algorithm.
+
+##### Default Password Policy
+
+Because the plain text password is not specified when a hashed password is provided, password policy is not applied.  
 
 #### Recovery Question Object
 
@@ -3319,12 +3839,16 @@ Specifies the authentication provider that validates the user&#8217;s password c
 
 | Property | DataType                                                     | Nullable | Unique | Readonly |
 |:---------|:-------------------------------------------------------------|:---------|:-------|:---------|
-| type     | `OKTA`, `ACTIVE_DIRECTORY`,`LDAP`, `FEDERATION`, or `SOCIAL` | FALSE    | FALSE  | TRUE     |
+| type     | `OKTA`, `ACTIVE_DIRECTORY`,`LDAP`, `FEDERATION`, `SOCIAL` or `IMPORT` | FALSE    | FALSE  | TRUE     |
 | name     | String                                                       | TRUE     | FALSE  | TRUE     |
 
 > `ACTIVE_DIRECTORY` or `LDAP` providers specify the directory instance name as the `name` property.
 
 > Users with a `FEDERATION` or `SOCIAL` authentication provider do not support a `password` or `recovery_question` credential and must authenticate via a trusted Identity Provider.
+
+>`IMPORT` specifies a hashed password that was imported from an external source.
+
+> Creating or updating users with an imported hashed password is an {% api_lifecycle ea %} feature.
 
 ### Links Object
 
@@ -3332,7 +3856,7 @@ Specifies link relations (See [Web Linking](http://tools.ietf.org/html/rfc5988))
 
 #### Individual Users vs Collection of Users
 
-For an individual User result, the Links Object contains a full set of link relations available for that User as determined by Policy. For a collection of Users, the Links Object contains only the self link. Operations that return a collection of Users include [List Users](#list-users) and [List Group Members](groups.html#list-group-members).
+For an individual User result, the Links Object contains a full set of link relations available for that User as determined by Policy. For a collection of Users, the Links Object contains only the self link. Operations that return a collection of Users include [List Users](#list-users) and [List Group Members](groups#list-group-members).
 
 
 | Link Relation Type     | Description                                                                                                                                           |
@@ -3454,4 +3978,4 @@ For an individual User result, the Links Object contains a full set of link rela
 | client_name | The name of the OAuth 2.0 client            | String                                                          | TRUE   |
 | client_uri  | The URI of the OAuth 2.0 client             | String                                                          | FALSE  |
 | logo_uri    | The logo URI of the OAuth 2.0 client        | String                                                          | FALSE  |
-| _links      | Discoverable resources related to the grant |     [JSON HAL](http://tools.ietf.org/html/draft-kelly-json-hal-06)  | FALSE  |
+| _links      | Discoverable resources related to the grant | [JSON HAL](http://tools.ietf.org/html/draft-kelly-json-hal-06)  | FALSE  |

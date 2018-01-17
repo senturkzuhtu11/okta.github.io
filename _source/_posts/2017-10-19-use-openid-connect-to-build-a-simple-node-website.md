@@ -3,6 +3,9 @@ layout: blog_post
 title: "Use OpenID Connect to Build a Simple Node.js Website"
 author: rdegges
 tags: [javascript, oidc, openid, nodejs, expressjs]
+tweets:
+    - "Learn how to use OpenID Connect to build a simple Node website."
+    - "Come see how to build a simple Node website using OpenID Connect!"
 ---
 
 
@@ -106,7 +109,7 @@ new Application:
 Next, you'll need your Okta Organization URL. If you go to the "Dashboard" page,
 you should see it at the top-right hand corner of the page. It's the setting
 called "Org URL". Here's what mine looks like, for example:
-dev-310095.oktapreview.com
+`dev-111464.oktapreview.com`
 
 {% img blog/use-openid-connect-to-build-a-simple-node-website/okta-org-url.png alt:"Okta Org URL" width:"700" %}{: .center-image }
 
@@ -279,7 +282,7 @@ To get started, you'll need to install two new Node.js libraries:
 
 [express-session](https://github.com/expressjs/session), which will manage user
 sessions for your website, and
-[oidc-middleware](https://github.com/okta/okta-oidc-js), which will handle all
+[oidc-middleware](https://github.com/okta/okta-oidc-js/tree/master/packages/oidc-middleware), which will handle all
 of the OIDC implementation details for your website
 
 To install these libraries, run the following command:
@@ -309,9 +312,9 @@ app.use(session({
 }));
 
 let oidc = new ExpressOIDC({
-  issuer: "https://dev-111464.oktapreview.com/oauth2/default",
-  client_id: "your-client-id-here",
-  client_secret: "your-client-secret-here",
+  issuer: "https://{yourOktaDomain}.com/oauth2/default",
+  client_id: "{clientId}",
+  client_secret: "{clientSecret}",
   redirect_uri: "http://localhost:3000/authorization-code/callback",
   routes: {
     callback: { defaultRedirect: "/dashboard" }
@@ -353,7 +356,7 @@ I'll walk you through them briefly:
   determine what data about your user is returned to you once the user has been
   signed in. The values here provide basic user information for your website. To
   view a complete list of available scopes, check out [this
-  page](https://developer.okta.com/standards/OIDC/index.html#scope-dependent-claims-not-always-returned).
+  page](/standards/OIDC/#scope-dependent-claims-not-always-returned).
 
 Now that you've configured OIDC for your website, it's time to hook up the
 routes:
@@ -479,7 +482,7 @@ can view your user information:
 
 Now that you've built your first Node.js site using OIDC to handle
 authentication using our new [oidc-middleware
-library](https://github.com/okta/okta-oidc-js), you might want to learn more
+library](https://github.com/okta/okta-oidc-js/tree/master/packages/oidc-middleware), you might want to learn more
 about OIDC.
 
 One of my good friends and co-workers [Micah

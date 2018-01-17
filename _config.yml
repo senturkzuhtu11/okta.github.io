@@ -13,7 +13,7 @@ plugins:
   - jekyll-redirect-from
   - jekyll-paginate
   - jekyll-assets
-  - jekyll-redirect-from
+  - jekyll-include-cache
 
 source: _source
 destination: dist
@@ -42,7 +42,6 @@ production_url: "https://developer.okta.com"
 
 include: [_static, .nojekyll, .woff, .tff]
 
-
 assets:
   compress:
     css: true
@@ -65,21 +64,21 @@ collections:
     output: true
   code:
     output: true
-    permalink: /:collection/:path:output_ext
   use_cases:
     output: true
   authentication-guide:
     output: true
-    permalink: /:collection/:path:output_ext
   reference:
     output: true
   3rd_party_notices:
     output: true
   docs:
     output: true
-    permalink: /:collection/:path:output_ext
   quickstarts:
     output: true
+  change-log:
+    output: true
+    permalink: /docs/change-log/
 
 paginate: 10
 paginate_path: "/blog/page/:num"
@@ -100,12 +99,27 @@ defaults:
       collection: reference
     values:
       layout: documentation
+  -
+    scope:
+      collection: quickstart
+    values:
+      sitemap: false
+  -
+    scope:
+      collection: quickstart-fragments
+    values:
+      sitemap: false
+  -
+    scope:
+      collection: change-log
+    values:
+      sitemap: false
 
 # Okta Library versions
 versions:
   jwt_validator_java: 0.2.0
   spring_boot_starter: 0.2.0
-  okta_signin_widget: 2.1.0
+  okta_signin_widget: 2.5.0
 
 signup_error_email_address: "BD-ISV@okta.com"
 

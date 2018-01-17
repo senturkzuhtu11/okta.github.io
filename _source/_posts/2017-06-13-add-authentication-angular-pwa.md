@@ -115,7 +115,7 @@ Your application has been created, but you still have a few settings to change.
 
 **Important:** You will need to remember this token value, so copy/paste it somewhere safe.
 
-For more information take a look at the official [Create an API token](/docs/api/getting_started/getting_a_token.html) guide.
+For more information take a look at the official [Create an API token](/docs/api/getting_started/getting_a_token) guide.
 
 ### Run the Spring Boot App
 
@@ -239,7 +239,7 @@ Install [Manfred Steyer's](https://github.com/manfredsteyer) project to [add OAu
 npm install --save angular-oauth2-oidc
 ```
 
-Modify `client/src/app/app.component.ts` to import `OAuthService` and configure your app to use your Okta application settings (replacing `[oidc-client-id]` and `[dev-id]` with the values from your "Angular PWA" OIDC app).
+Modify `client/src/app/app.component.ts` to import `OAuthService` and configure your app to use your Okta application settings (replacing `{clientId}` and `{yourOktaDomain}` with the values from your "Angular PWA" OIDC app).
 
 ```typescript
 import { OAuthService } from 'angular-oauth2-oidc';
@@ -248,10 +248,10 @@ import { OAuthService } from 'angular-oauth2-oidc';
 
   constructor(private oauthService: OAuthService) {
     this.oauthService.redirectUri = window.location.origin;
-    this.oauthService.clientId = '[oidc-client-id]';
+    this.oauthService.clientId = '{clientId}';
     this.oauthService.scope = 'openid profile email';
     this.oauthService.oidc = true;
-    this.oauthService.issuer = 'https://dev-[dev-id].oktapreview.com';
+    this.oauthService.issuer = 'https://{yourOktaDomain}.com/oauth2/default';
 
     this.oauthService.loadDiscoveryDocument().then(() => {
       this.oauthService.tryLogin({});
@@ -402,7 +402,7 @@ Click the **Login** button and sign-in with one of the user's that are configure
 This will likely fail with an error similar to the following:
  
 ```
-https://dev-158606.oktapreview.com/.well-known/openid-configuration net::ERR_FAILED
+https://dev-158606.oktapreview.com/oauth2/default/.well-known/openid-configuration net::ERR_FAILED
 error loading discovery document 
 ```
  
@@ -446,7 +446,7 @@ If it works - great, now we can add auth with Okta!
 
 ### Authenticating with the Okta Auth SDK
 
-The Okta Auth SDK builds on top of Okta's [Authentication API](/docs/api/resources/authn.html) and [OAuth 2.0 API](/docs/api/resources/oidc.html) to enable you to create a fully branded sign-in experience using JavaScript.
+The Okta Auth SDK builds on top of Okta's [Authentication API](/docs/api/resources/authn) and [OAuth 2.0 API](/docs/api/resources/oidc) to enable you to create a fully branded sign-in experience using JavaScript.
 
 Install it using npm:
 
@@ -530,7 +530,8 @@ export class HomeComponent {
   loginWithPassword() {
     this.oauthService.createAndSaveNonce().then(nonce => {
       const authClient = new OktaAuth({
-        url: this.oauthService.issuer
+        url: 'https://{yourOktaDomain}.com',
+        issuer: 'default'
       });
       authClient.signIn({
         username: this.username,

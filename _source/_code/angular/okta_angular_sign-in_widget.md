@@ -33,13 +33,13 @@ If you do not already have a  **Developer Edition Account**, you can create one 
 To quickly create an Angular app, we recommend the **angular-cli**. Follow [their installation guide](https://github.com/angular/angular-cli#installation) to create a new Angular app.
 
 ## Install Dependencies
-A simple way to add authentication into an Angular app is using the library [Okta Sign-In Widget](/code/javascript/okta_sign-in_widget.html). We can install it via `npm`:
+A simple way to add authentication into an Angular app is using the library [Okta Sign-In Widget](/code/javascript/okta_sign-in_widget). We can install it via `npm`:
 
 ```bash
 cd okta-app && npm install @okta/okta-signin-widget --save
 ```
 
-To easily interact with the [Okta Sign-In Widget](/code/javascript/okta_sign-in_widget.html), we will also need [`@okta/okta-angular`](https://github.com/okta/okta-oidc-js/tree/master/packages/okta-angular):
+To easily interact with the [Okta Sign-In Widget](/code/javascript/okta_sign-in_widget), we will also need [`@okta/okta-angular`](https://github.com/okta/okta-oidc-js/tree/master/packages/okta-angular):
 
 ```bash
 npm install @okta/okta-angular --save
@@ -151,7 +151,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationStart} from '@angular/router';
 
 import { OktaAuthService } from '@okta/okta-angular';
-import * as OktaSignIn from '@okta/okta-signin-widget/dist/js/okta-sign-in.min.js';
+import * as OktaSignIn from '@okta/okta-signin-widget';
 
 @Component({
   selector: 'app-secure',
@@ -275,7 +275,7 @@ npm start
 ```
 
 ## Conclusion
-You have now successfully authenticated with Okta! Now what? With a user's `id_token`, you have basic claims for the user's identity. You can extend the set of claims by modifying the `scopes` to retrieve custom information about the user. This includes `locale`, `address`, `groups`, and [more](../../docs/api/resources/oidc.html).
+You have now successfully authenticated with Okta! Now what? With a user's `id_token`, you have basic claims for the user's identity. You can extend the set of claims by modifying the `scopes` to retrieve custom information about the user. This includes `locale`, `address`, `groups`, and [more](../../docs/api/resources/oidc).
 
 Want to learn how to use the user's `access_token`? Check out our <a href='/quickstart/#/angular/nodejs/generic' data-proofer-ignore>Angular Quickstart integrations</a> to learn about protecting routes on your server, validating the `access_token`, and more!
 

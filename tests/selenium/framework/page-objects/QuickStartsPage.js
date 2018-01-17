@@ -13,6 +13,7 @@ class QuickStartsPage extends BasePage {
     this.$androidLink = element(by.linkText('Android'));
     this.$angularLink = element(by.linkText('Angular'));
     this.$iOSLink = element(by.linkText('iOS'));
+    this.$vueLink = element(by.linkText('Vue'));
     this.$siwLink = element(by.linkText('Okta Sign-In Widget'));
     this.$reactLink = element(by.linkText('React'));
     this.$hostedLink = element(by.linkText('Okta Sign-In Page'));
@@ -29,6 +30,19 @@ class QuickStartsPage extends BasePage {
     this.$aspFour = element(by.linkText('ASP.NET 4.x'));
     this.$$activeLinks = $$('.active');
     this.$$frameworkLinks = $$('#framework-selector a');
+    this.$$signInPageContentHeader = element(by.id('okta-sign-in-page-quickstart'));
+    this.$$signInWidgetContentHeader = element(by.id('okta-sign-in-widget-quickstart'));
+    this.$$angularContentHeader = element(by.id('okta-angular-quickstart'));
+    this.$$reactContentHeader = element(by.id('okta-react-quickstart'));
+    this.$$androidContentHeader = element(by.id('okta-android-quickstart'));
+    this.$$iosContentHeader = element(by.id('okta-ios-quickstart'));
+    this.$$nodeGenericContentHeader = element(by.id('okta-nodejs-quickstart'));
+    this.$$nodeExpressContentHeader = element(by.id('okta-nodejsexpressjs-quickstart'));
+    this.$$javaGenericContentHeader = element(by.id('okta-java-quickstart'));
+    this.$$javaSpringExpressContentHeader = element(by.id('okta-javaspring-quickstart'));
+    this.$$phpGenericContentHeader = element(by.id('okta-php-quickstart'));
+    this.$$dotnetAspCoreGenericContentHeader = element(by.id('okta-aspnet-core-mvc-quickstart'));
+    this.$$dotnetAsp4GenericContentHeader = element(by.id('okta-aspnet-4x-mvc-quickstart'));
 
     this.setPageLoad(this.$clientSelector);
   }
@@ -70,7 +84,7 @@ class QuickStartsPage extends BasePage {
     return this.$hostedLink.click();
   }
 
-  selectAndroid() {
+  selectAndroidClient() {
     return this.$androidLink.click();
   }
 
@@ -80,6 +94,10 @@ class QuickStartsPage extends BasePage {
 
   selectiOSClient() {
     return this.$iOSLink.click();
+  }
+
+  selectVueClient() {
+    return this.$vueLink.click();
   }
 
   selectReactClient() {
@@ -144,5 +162,58 @@ class QuickStartsPage extends BasePage {
   frameworkLinksContain(links) {
     return this.elementsContainText(this.$$frameworkLinks, links);
   }
+
+  isShowingSignInPageContent() {
+    return this.$$signInPageContentHeader.isPresent();
+  }
+
+  isShowingSignInWidgetContent() {
+    return this.$$signInWidgetContentHeader.isPresent();
+  }
+
+  isShowingAngularContent() {
+    return this.$$angularContentHeader.isPresent();
+  }
+
+  isShowingReactContent() {
+    return this.$$reactContentHeader.isPresent();
+  }
+
+  isShowingAndroidContent() {
+    return this.$$androidContentHeader.isPresent();
+  }
+
+  isShowingIosContent() {
+    return this.$$iosContentHeader.isPresent();
+  }
+
+  isShowingNodeGenericContent() {
+    return this.$$nodeGenericContentHeader.isPresent();
+  }
+
+  isShowingNodeExpressContent() {
+    return this.$$nodeExpressContentHeader.isPresent();
+  }
+
+  isShowingJavaGenericContent() {
+    return this.$$javaGenericContentHeader.isPresent();
+  }
+
+  isShowingJavaSpringContent() {
+    return this.$$javaSpringExpressContentHeader.isPresent();
+  }
+
+  isShowingPhpGenericContent() {
+    return this.$$phpGenericContentHeader.isPresent();
+  }
+
+  isShowingDotnetAspCoreContent() {
+    return this.$$dotnetAspCoreGenericContentHeader.isPresent();
+  }
+
+  isShowingDotnetAsp4Content() {
+    return this.$$dotnetAsp4GenericContentHeader.isPresent();
+  }
+
 }
 module.exports = QuickStartsPage;
