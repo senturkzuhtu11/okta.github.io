@@ -11,8 +11,12 @@ excerpt: Understand rate limits at Okta and learn how to design for efficient us
 
 The number of API requests for an organization is limited for all APIs in order to protect the service for all users.
 
-Okta has two types of rate limits:  org-wide rate limits that vary by API
-endpoint, and concurrent rate limits on the number of simultaneous transactions regardless of endpoint. These two types of limits are evaluated separately and reported in headers that are returned with each response.
+Okta has three types of rate limits:  org-wide rate limits that vary by API
+endpoint, concurrent rate limits on the number of simultaneous transactions regardless of endpoint, and end-user rate limits on the endpoints that end users access directly. 
+
+Org-wide and concurrent limits are evaluated separately and reported in headers that are returned with each response. <!-- How are end user limits reported? -->
+
+> Note that these limits are not covered by the API SLA, and may be changed if the service requires it to protect customers. We provide advance warning of changes when possible.
 
 ## Org-Wide Rate Limits
 
@@ -37,6 +41,7 @@ When reading the following tables, remember that a more specific limit is consid
 | Create or list users | `/api/v1/users`                                                 |   600 |
 | Get a user | `/api/v1/users/{id}`                                                       |  2000 |
 | Create, update, or delete a user | `/api/v1/users/{id}`                      |   600 |
+| Create, update, or delete a user | `/api/v1/users/{login}`                 |   600 |
 | All actions | `/api/v1/`              |  1200 |
 
 ### Okta API Endpoints and Per-Second Limits
@@ -79,6 +84,10 @@ Any request that would cause Okta to exceed the concurrent limit returns an HTTP
 Reporting concurrent rate limits once a minute keeps log volume manageable. 
 
 >Important: Operations rarely hit the concurrent rate limit: even very large bulk loads rarely use more than 10 threads at a time. If you hit concurrent rate limits, check the information in [Best Practices for Rate Limits](#best-practices-for-rate-limits) for solutions before requesting a rate limit increase.
+
+# End-User Rate Limit
+
+In addition to the org-wide and concurrent rate limit, Okta limits the number of requests per end user to 40 per 10 seconds per endpoint. <!-- what happens if they cross the threshold? Message to log? --> 
 
 ## Check Your Rate Limits with Okta's Rate Limit Headers
 
@@ -133,7 +142,7 @@ X-Rate-Limit-Reset: 1605463723
 
 ### Example Rate Limit Header with Concurrent Rate Limit  
 
-This example shows the relevant portion of a rate limit header being returned with the error for a request that exceeded the concurrent rate limit. If the rate limit wasn't being exceeded, the headers woul contain information about the org-wide rate limit. You won't ever see non-error concurrent rate limits in the headers.
+This example shows the relevant portion of a rate limit header being returned with the error for a request that exceeded the concurrent rate limit. If the rate limit wasn't being exceeded, the headers would contain information about the org-wide rate limit. You won't ever see non-error concurrent rate limits in the headers.
 
 ~~~http
 HTTP/1.1 429 
@@ -271,33 +280,3 @@ The following header is set in each response:
 HTTP/1.1 200 OK
 X-Okta-Request-Id: reqVy8wsvmBQN27h4soUE3ZEnA
 ~~~
-
-## Best Practices for Rate Limits
-
-You can avoid exceeding rate limits by following Okta's recommended best practices:
-
-* [Data Import](#data-import)
-* [Throttling](#throttling)
-* [Normal API Usage](#normal-api-usage)
-* [Caching](#caching)
-
-### Data Import
-
-When you are importing data or doing other bulk operations, follow these guidelines:
-
-* Add records serially rather than asynchronously to avoid hitting concurrent rate limits.
-* What else?
-* What else?
-
-### Throttling
-
-Need content. Throttling requests?
-
-### Normal API Usage
-
-Need content
-
-### Caching
-
-Need content. 
-
