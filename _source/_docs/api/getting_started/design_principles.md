@@ -274,7 +274,7 @@ Object whose property names are link relation types (as defined by [RFC5988](htt
 }
 ~~~
 
-#### Links in collections
+### Links in Collections
 
 Note that HAL links returned in a collection of resources may not reflect the total set of operations that are possible on that resource.  For example, in a user collection links indicating that a given user can be "unlocked" may not be returned and, if returned, may not reflect the correct user state.
 
