@@ -7,9 +7,6 @@ if [[ $TRAVIS_EVENT_TYPE != 'push' ]]; then
   export CHROME_HEADLESS=true
 fi
 
-# Force error for testing purposes
-exit 1
-
 # 2. Run the npm install to pull in test dependencies
 fold npm_install npm install
 

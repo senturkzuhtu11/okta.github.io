@@ -30,9 +30,6 @@ deploy:
     branch: source
 notifications:
   slack:
-    template:
-      - "%{repository_slug} (%{commit}) : %{message} %{foo} "
-      - "Build details: %{build_url}"
     on_success: change
     on_failure: always
     rooms:
