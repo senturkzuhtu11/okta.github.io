@@ -359,17 +359,20 @@ This object provides a way to store additional text about an event for debugging
 
 ### AuthenticationContext Object
 
-Describes authentication data for an event.
+When an action requires the [actor](#actor-object)'s identity to be authenticated, authentication metadata will be stored in the **AuthenticationContext**.
+
+All authentication relies on validating a credential that proves the authenticity of the actor's identity. Credentials are sometimes provided by the actor, as is the case with passwords, and at other times provided by a third party, and validated by the authentication provider.
 
 |------------+----------------------------------------------------------------+-----------------+----------+-----------+-----------|
 | Property   | Description                                                    | DataType        | Nullable | MinLength | MaxLength |
 | ---------- | -------------------------------------------------------------- | --------------- | -------- | --------- | --------- |
-| authenticationProvider | Type of authentication provider: `OKTA_AUTHENTICATION_PROVIDER`, `ACTIVE_DIRECTORY`, `LDAP`, `FEDERATION`, `SOCIAL`, `FACTOR_PROVIDER` | String | TRUE  | | |
-| credentialProvider | Type of credential provider: OKTA_CREDENTIAL_PROVIDER, RSA, SYMANTEC, GOOGLE, DUO, YUBIKEY | Array of String | TRUE  |           |           |
-| credentialType | Type of credential: `OTP`, `SMS`, `PASSWORD`, `ASSERTION`, `IWA`, `EMAIL`, `OAUTH2`, `JWT` | String        | TRUE     |           |           |
-| issuer     | Issuer of the credential                                       | [Issuer Object](#issuer-object) | TRUE | |         |
-| externalSessionId | External Session identifier of the request              | String          | TRUE     | 1         | 255       |
-| interface  | Authentication interface                                       | String          | TRUE     | 1         | 255       |
+| authenticationProvider | The system that proves the identity of an actor using the credentials provided to it. `OKTA_AUTHENTICATION_PROVIDER`, `ACTIVE_DIRECTORY`, `LDAP`, `FEDERATION`, `SOCIAL`, `FACTOR_PROVIDER` | String | TRUE  | | |
+| authenticationStep | | Integer | FALSE  | | |
+| credentialProvider | The external software service that manages identities and their associated credentials. It will typically handle requests to store credentials issued by an issuer and to retrieve credentials when requested by a credential inspector. Examples: `OKTA_CREDENTIAL_PROVIDER`, `RSA`, `SYMANTEC`, `GOOGLE`, `DUO`, `YUBIKEY`. This field is used when the credential is given by a third party, such as a social IDP. | Array of String | TRUE  |           |           |
+| credentialType | The underlying technology/scheme used in the credential: `OTP`, `SMS`, `PASSWORD`, `ASSERTION`, `IWA`, `EMAIL`, `OAUTH2`, `JWT` | String        | TRUE     |           |           |
+| issuer     | The specific software entity that created and issued the credential. | [Issuer Object](#issuer-object) | TRUE | |         |
+| externalSessionId | A proxy for the actor's [session ID](https://www.owasp.org/index.php/Session_Management_Cheat_Sheet) | String          | TRUE     | 1         | 255       |
+| interface  | The third party application that the actor authenticates through, if any. | String          | TRUE     | 1         | 255       |
 |------------+----------------------------------------------------------------+-----------------+----------+-----------+-----------|
 
 ### Issuer Object
