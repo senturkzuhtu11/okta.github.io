@@ -3562,7 +3562,7 @@ Parameter      | Description                                         | Param Typ
 fid            | `id` of factor returned from enrollment             | URL        | String   | TRUE     |
 stateToken     | [state token](#state-token) for current transaction | Body       | String   | TRUE     |
 rememberDevice | user&#8217;s decision to remember device            | URL        | Boolean  | FALSE    |
-
+autoPush       | user&#8217;s decision to send push to device automatically | URL | Boolean  | FALSE    |
 
 ##### Request Example for Verify Push Factor
 {:.api .api-request .api-request-example}
